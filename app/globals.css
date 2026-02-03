@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+  --terminal-green: #10b981;
+  --terminal-dim: #059669;
+  --deep-sea: #020617;
+  --alert-red: #ef4444;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-terminal-green: var(--terminal-green);
+  --color-terminal-dim: var(--terminal-dim);
+  --color-deep-sea: var(--deep-sea);
+  --color-alert-red: var(--alert-red);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-mono), monospace;
+  overflow: hidden; /* Prevent scroll for the app feel */
+}
+
+/* Custom Scrollbar for Terminal Feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--terminal-dim);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--terminal-green);
+}

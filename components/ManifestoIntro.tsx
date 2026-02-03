@@ -1,0 +1,66 @@
+import React, { useState, useEffect } from 'react';
+
+interface ManifestoIntroProps {
+    onComplete: () => void;
+    lang: 'en' | 'ko';
+}
+
+export function ManifestoIntro({ onComplete, lang }: ManifestoIntroProps) {
+    const [step, setStep] = useState(0);
+    const [displayedText, setDisplayedText] = useState("");
+
+    const content = lang === 'ko' ? [
+        "세상은 소음으로 가득 차 있습니다.",
+        "당신의 생각은 타인의 언어로 오염되었습니다.",
+        "이제, 깊은 바다로 잠항하여...",
+        "당신의 진짜 목소리를 인양하십시오."
+    ] : [
+        "The world is full of noise.",
+        "Your thoughts are polluted by others' words.",
+        "Now, dive into the deep sea...",
+        "And salvage your true voice."
+    ];
+
+    useEffect(() => {
+        if (step >= content.length) return;
+
+        let currentText = "";
+        const targetText = content[step];
+        let charIndex = 0;
+
+        // Typing effect
+        const timer = setInterval(() => {
+            if (charIndex < targetText.length) {
+                currentText += targetText[charIndex];
+                setDisplayedText(currentText);
+                charIndex++;
+            } else {
+                clearInterval(timer);
+                // Auto advance after short delay, unless it's the last step
+                if (step < content.length - 1) {
+                    setTimeout(() => setStep(prev => prev + 1), 1500);
+                }
+            }
+        }, 50); // Speed
+
+        return () => clearInterval(timer);
+    }, [step, lang]);
+
+    return (
+        <div className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center p-8 text-center">
+            <div className="max-w-xl font-serif text-lg md:text-2xl leading-relaxed text-gray-300 min-h-[100px]">
+                {displayedText}
+                <span className="animate-pulse inline-block w-2 h-5 bg-terminal-green ml-1 align-middle"></span>
+            </div>
+
+            {step === content.length - 1 && (
+                <button
+                    onClick={onComplete}
+                    className="mt-12 px-8 py-3 border border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-black transition-all duration-500 tracking-widest text-sm md:text-base animate-in fade-in zoom-in duration-1000"
+                >
+                    {lang === 'ko' ? "[ 잠항 개시 ]" : "[ INITIATE DIVE ]"}
+                </button>
+            )}
+        </div>
+    );
+}

@@ -17,26 +17,32 @@
   --color-deep-sea: var(--deep-sea);
   --color-alert-red: var(--alert-red);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif-kr);
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-mono), monospace;
-  overflow: hidden; /* Prevent scroll for the app feel */
+  font-family: var(--font-serif), serif;
+  /* Default to Serif for Emotional Core */
+  overflow: hidden;
+  /* Prevent scroll for the app feel */
 }
 
 /* Custom Scrollbar for Terminal Feel */
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--background);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--terminal-dim);
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--terminal-green);
 }

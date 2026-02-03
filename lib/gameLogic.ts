@@ -1,48 +1,74 @@
-import { translations, Language } from './translations';
+import { Language } from './translations';
+import { KO_DICTIONARY } from './locales/ko';
+import { EN_DICTIONARY } from './locales/en';
 
-export const BANNED_WORDS = [
-    "오글거려",
-    "짜증나",
-    "대박",
-    "에바",
-    "극혐",
-    "그냥",
-    "몰라",
-    "대충",
-    "글쎄"
-];
-
-// Simple English banned words for demo purposes
-export const BANNED_WORDS_EN = [
-    "just",
-    "whatever",
-    "idk",
-    "dunno",
-    "boring"
-];
-
-export interface GameState {
-    resolution: number;
-    isGameOver: boolean;
+export interface CheckResult {
+    isValid: boolean;
+    message?: string;
+    penalty?: number;
+    reward?: number;
 }
 
-export function checkInput(input: string, lang: Language = 'ko'): { isValid: boolean; message?: string } {
-    const lowerInput = input.trim().toLowerCase();
+export function checkInput(input: string, lang: Language, currentResolution: number): CheckResult {
+    const dict = lang === 'ko' ? KO_DICTIONARY : EN_DICTIONARY;
+    const lowerInput = input.trim().toLowerCase(); // Korean input usually kept as is, but for safety
 
-    const targetBannedWords = lang === 'ko' ? BANNED_WORDS : BANNED_WORDS_EN;
-    const warningMsg = translations[lang].warning_sink;
-
-    // Check for banned words
-    for (const word of targetBannedWords) {
-        if (lowerInput.includes(word)) {
-            return { isValid: false, message: warningMsg };
+    // 1. Context Awareness (Special Triggers)
+    // Check special cases first (e.g., "오히려 좋아")
+    for (const [key, value] of Object.entries(dict.special)) {
+        if (lowerInput.includes(value.trigger)) {
+            return {
+                isValid: false,
+                message: value.response,
+                penalty: 5 // Standard penalty for specific context failures
+            };
         }
     }
 
-    return { isValid: true };
+    // 2. Banned Word Categories
+    for (const [catKey, category] of Object.entries(dict.categories)) {
+        for (const word of category.words) {
+            if (lowerInput.includes(word)) {
+                // Critical Penalty Logic
+                // If Resolution is low (< 50%) and they use memes/banned words -> CRITICAL HIT
+                const isCritical = currentResolution < 50;
+                const penalty = isCritical ? 15 : 5;
+
+                // Random adversarial response from the category
+                const randomResponse = category.responses[Math.floor(Math.random() * category.responses.length)];
+
+                return {
+                    isValid: false,
+                    message: randomResponse,
+                    penalty: penalty
+                };
+            }
+        }
+    }
+
+    // 3. Density Check (Length)
+    const minLength = lang === 'ko' ? 15 : 20; // roughly 5 words or 20 chars
+    if (input.trim().length < minLength) {
+        return {
+            isValid: false,
+            message: dict.errors.low_density,
+            penalty: 0 // No penalty, just rejection
+        };
+    }
+
+    // 4. Success (Reward)
+    // Reward logic: +10 base, maybe +15 if very long?
+    // For now simple +10
+    const reward = 10;
+    const rewardMsg = dict.rewards.fog_clearing[Math.floor(Math.random() * dict.rewards.fog_clearing.length)];
+
+    return {
+        isValid: true,
+        message: rewardMsg,
+        reward: reward
+    };
 }
 
-export function calculateResolutionIncrease(currentResolution: number): number {
-    // Simple logic: +10% per valid input, capped at 100
-    return Math.min(100, currentResolution + 10);
+export function calculateNewResolution(current: number, change: number): number {
+    return Math.min(100, Math.max(0, current + change));
 }

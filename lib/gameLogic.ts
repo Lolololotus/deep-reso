@@ -8,44 +8,54 @@ export interface CheckResult {
     penalty?: number;
     reward?: number;
     isGlitch?: boolean;
-    diggingMessage?: string; // New: For "New Coordinate" feedback
+    diggingMessage?: string;
+    usedQuestionId?: string; // To update the anti-repetition queue
 }
 
 export function calculateNewResolution(current: number, change: number): number {
     return Math.min(100, Math.max(0, current + change));
 }
 
-// Simple keyword extractor
-function extractKeywords(input: string, lang: Language): string[] {
-    if (lang === 'en') {
-        // Basic English extraction: remove common stop words, find long words
-        const comments = ["the", "and", "is", "that", "this", "it", "to", "of", "in", "for", "with", "on", "at", "my", "me"];
-        return input.split(' ')
-            .map(w => w.replace(/[^\w]/g, '').toLowerCase())
-            .filter(w => w.length > 3 && !comments.includes(w));
+// Category Mapping
+type DiggingCategory = 'fatigue' | 'attitude' | 'language' | 'ambiguity' | 'joy';
+
+function determineCategory(input: string, lang: Language): DiggingCategory {
+    const text = input.toLowerCase();
+
+    // Keywords mapping
+    if (lang === 'ko') {
+        if (/피곤|힘들|지쳐|죽겠|졸려|두통|방전|무기력|싫어|짜증|우울/.test(text)) return 'fatigue';
+        if (/착하|다정|성격|마음|화나|열받|무시|자존심|겸손|배려|솔직/.test(text)) return 'attitude';
+        if (/말|대화|침묵|표현|설명|이해|소통|글|문장|단어/.test(text)) return 'language';
+        if (/그냥|글쎄|몰라|아마|대충|애매|별로|그저/.test(text)) return 'ambiguity';
+        if (/좋아|기뻐|행복|신나|즐거|만족|성공|웃겨|사랑|최고/.test(text)) return 'joy';
     } else {
-        // Simple Korean extraction heuristic
-        // Split by space, remove common endings if possible (very naive), filter length >= 2
-        // Avoiding complex NLP for now, just taking significant chunks
-        return input.split(' ')
-            .map(w => w.replace(/[.,!?]/g, ''))
-            .filter(w => w.length >= 2 && !["나는", "내가", "너무", "정말", "진짜", "그리고", "하지만"].includes(w));
+        if (/tired|exhaust|hard|headache|drain|lazy|hate|annoy|depress/.test(text)) return 'fatigue';
+        if (/kind|nice|mean|angry|proud|humble|honest|care|ignore/.test(text)) return 'attitude';
+        if (/say|talk|speak|word|silent|quiet|explain|mean/.test(text)) return 'language';
+        if (/just|dunno|maybe|guess|blur|vag/.test(text)) return 'ambiguity';
+        if (/good|happy|love|great|fun|joy|laugh|best/.test(text)) return 'joy';
     }
+
+    // Default to ambiguity if unclear, or language (meta)
+    return 'ambiguity';
 }
 
-export function checkInput(input: string, lang: Language, currentResolution: number): CheckResult {
+// Simple keyword extractor (Visual only)
+function extractKeyword(input: string, lang: Language): string {
+    const words = input.split(' ').filter(w => w.length >= 2);
+    // Return random word from input or last word
+    return words.length > 0 ? words[Math.floor(Math.random() * words.length)] : input;
+}
+
+export function checkInput(input: string, lang: Language, currentResolution: number, recentQuestionIndices: string[] = []): CheckResult {
     const dict = lang === 'ko' ? KO_DICTIONARY : EN_DICTIONARY;
     const lowerInput = input.trim().toLowerCase();
 
-    // 0. Adaptive Difficulty & Zone Logic
+    // 0. Adaptive Difficulty
     const difficultyMultiplier = currentResolution < 30 ? 0.5 : 1.0;
 
-    // Zone determination
-    let currentZone: 'sensation' | 'memory' | 'essence' = 'sensation';
-    if (currentResolution > 60) currentZone = 'essence';
-    else if (currentResolution > 30) currentZone = 'memory';
-
-    // 1. Context Awareness (Special Triggers)
+    // 1. Context Awareness
     for (const [key, value] of Object.entries(dict.special)) {
         if (lowerInput.includes(value.trigger)) {
             return {
@@ -57,21 +67,24 @@ export function checkInput(input: string, lang: Language, currentResolution: num
         }
     }
 
-    // 2. Dissection Logic (Abstract Words)
+    // 2. Dissection Logic (Abstract Words) - Still valid as a quick check
     const abstractWords = lang === 'ko'
-        ? ["피곤", "좋아", "그냥", "몰라", "짜증", "대충", "힘들"]
-        : ["tired", "good", "just", "dunno", "maybe", "hard"];
+        ? ["피곤", "좋아", "그냥", "몰라", "짜증", "대충"]
+        : ["tired", "good", "just", "dunno", "maybe"];
 
-    for (const word of abstractWords) {
-        if (lowerInput.includes(word)) {
-            return {
-                isValid: false,
-                message: lang === 'ko'
-                    ? "그 단어는 너무 납작합니다. 이 단어의 '입체감'을 설명하십시오. 육체의 비명입니까, 영혼의 고갈입니까?"
-                    : "That word is too flat. Describe its dimensionality. Is it fatigue of the body or the soul?",
-                penalty: 3 * difficultyMultiplier,
-                isGlitch: true
-            };
+    // Only trigger basic dissection if input is SHORT. If long, use Deep Digging.
+    if (input.length < 20) {
+        for (const word of abstractWords) {
+            if (lowerInput.includes(word)) {
+                return {
+                    isValid: false,
+                    message: lang === 'ko'
+                        ? "그 단어는 너무 납작합니다. 이 단어의 '입체감'을 설명하십시오. 육체의 비명입니까, 영혼의 고갈입니까?"
+                        : "That word is too flat. Describe its dimensionality. Is it fatigue of the body or the soul?",
+                    penalty: 3 * difficultyMultiplier,
+                    isGlitch: true
+                };
+            }
         }
     }
 
@@ -103,45 +116,47 @@ export function checkInput(input: string, lang: Language, currentResolution: num
         };
     }
 
-    // 5. Success & Infinite Digging Engine
+    // 5. Success & Infinite Digging Engine (v3.1)
     const isHighQuality = input.length > 30;
     const reward = isHighQuality ? 15 : 10;
-    let rewardMsg = "";
 
-    // Digging Logic: Extract keyword and generate question based on Zone
-    const keywords = extractKeywords(input, lang);
+    // Digging Logic
+    const category = determineCategory(input, lang);
+    const questions = translations[lang].digging_categories[category];
+
+    // Anti-Repetition Logic
+    // Filter out questions that are in recentQuestionIndices
+    // We identify questions by "category_index"
+    const availableIndices = questions
+        .map((q, idx) => ({ q, id: `${category}_${idx}` }))
+        .filter(item => !recentQuestionIndices.includes(item.id));
+
     let diggingMsg = undefined;
+    let usedQuestionId = undefined;
 
-    if (keywords.length > 0) {
-        // Pick longest keyword for better 'weight'
-        const keyword = keywords.reduce((a, b) => a.length > b.length ? a : b);
+    if (availableIndices.length > 0) {
+        const selected = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+        const keyword = extractKeyword(input, lang);
+        const prelude = translations[lang].digging_prelude.replace('{keyword}', keyword);
 
-        // Select question type based on Zone
-        const t = translations[lang];
-        let questionTemplate = "";
-
-        if (currentZone === 'sensation') questionTemplate = t.digging.sensation;
-        else if (currentZone === 'memory') questionTemplate = t.digging.origin;
-        else questionTemplate = t.digging.substitution;
-
-        const question = questionTemplate.replace('{keyword}', keyword);
-        const prelude = t.digging.prelude.replace('{keyword}', keyword);
-
-        // We bundle the prelude and question.
-        // Or we can return them to be displayed separately.
-        // For now, let's append to rewardMsg or return as separate `diggingMessage`
-        diggingMsg = `${prelude}\n\n${question}`;
-    }
-
-    // If no digging triggered (no keywords), fallback to generic reward
-    if (!diggingMsg) {
-        rewardMsg = dict.rewards.fog_clearing[Math.floor(Math.random() * dict.rewards.fog_clearing.length)];
+        diggingMsg = `${prelude}\n\n${selected.q}`;
+        usedQuestionId = selected.id;
+    } else {
+        // FALLBACK: Signal Instability (Queue is full or no questions left)
+        // Or just clear queue?
+        // User requested: "Signal Instability" Glitch
+        return {
+            isValid: true, // It's valid density, but system failure
+            message: translations[lang].system_busy,
+            isGlitch: true, // Strong glitch
+            reward: reward // Still acknowledge effort
+        };
     }
 
     return {
         isValid: true,
-        message: rewardMsg || undefined, // If digging, we might not show generic reward text, or show both
         diggingMessage: diggingMsg,
+        usedQuestionId: usedQuestionId,
         reward: reward,
         isGlitch: false
     };

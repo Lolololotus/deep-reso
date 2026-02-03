@@ -26,6 +26,9 @@ export default function Home() {
   const [consecutiveFailures, setConsecutiveFailures] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
 
+  // Anti-Repetition Queue (v3.1)
+  const [recentTemplates, setRecentTemplates] = useState<string[]>([]);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init-1',
@@ -50,7 +53,9 @@ export default function Home() {
       const timer = setTimeout(() => {
         setMessages(prev => {
           // Prevent duplicate nudges
-          if (prev[prev.length - 1].role === 'system' && prev[prev.length - 1].content === translations[lang].guide_nudge) {
+          if (prev.length > 0 &&
+            prev[prev.length - 1].role === 'system' &&
+            prev[prev.length - 1].content === translations[lang].guide_nudge) {
             return prev;
           }
           return [...prev, {
@@ -77,7 +82,8 @@ export default function Home() {
 
     // 2. Logic Check
     setTimeout(() => {
-      const checkResult = checkInput(content, lang, resolution);
+      // Updated checkInput with recentTemplates (v3.1)
+      const checkResult = checkInput(content, lang, resolution, recentTemplates);
       setIsScanning(false);
 
       if (!checkResult.isValid) {
@@ -115,6 +121,15 @@ export default function Home() {
         // SUCCESS
         setConsecutiveFailures(0);
 
+        // Update Anti-Repetition Queue
+        if (checkResult.usedQuestionId) {
+          setRecentTemplates(prev => {
+            const newQueue = [...prev, checkResult.usedQuestionId!];
+            if (newQueue.length > 5) newQueue.shift(); // Keep last 5
+            return newQueue;
+          });
+        }
+
         const reward = checkResult.reward || 10;
         let newResolution = calculateNewResolution(resolution, reward);
         let responseMsg = "";
@@ -141,7 +156,7 @@ export default function Home() {
             id: Date.now().toString() + '-sys',
             role: 'system',
             content: responseMsg,
-            isGlitch: !!checkResult.diggingMessage
+            isGlitch: !!checkResult.isGlitch || !!checkResult.diggingMessage
           }]);
         }, 500);
       }

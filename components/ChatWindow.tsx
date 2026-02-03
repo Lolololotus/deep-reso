@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { translations, Language } from '@/lib/translations';
+import { GlitchText } from './GlitchText';
 
 interface Message {
     id: string;
     role: 'user' | 'system';
     content: string;
+    isGlitch?: boolean;
 }
 
 interface ChatWindowProps {
@@ -14,6 +16,7 @@ interface ChatWindowProps {
 
 export function ChatWindow({ messages, lang }: ChatWindowProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const t = translations[lang];
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -24,34 +27,37 @@ export function ChatWindow({ messages, lang }: ChatWindowProps) {
     return (
         <div
             ref={scrollRef}
-            className="w-full max-w-3xl h-[60vh] overflow-y-auto bg-black/80 border border-gray-800 p-4 font-mono shadow-inner mb-2 custom-scrollbar"
+            className="w-full h-[400px] bg-black/50 border border-terminal-green/30 rounded-lg p-4 overflow-y-auto font-serif scrollbar-hide backdrop-blur-sm shadow-inner"
         >
-            {messages.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center text-gray-600 opacity-50">
-                    <p>{translations[lang].no_data}</p>
-                    <p className="text-xs mt-2">{translations[lang].begin_transmission}</p>
-                </div>
-            )}
-
-            {messages.map((msg) => (
-                <div
-                    key={msg.id}
-                    className={`mb-4 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                    <div
-                        className={`max-w-[80%] p-3 text-sm md:text-base border-l-2 leading-relaxed
-            ${msg.role === 'user'
-                                ? 'border-terminal-green bg-terminal-green/5 text-foreground'
-                                : 'border-terminal-dim bg-gray-900/50 text-terminal-green'
-                            }`}
-                    >
-                        <span className="block text-[10px] opacity-50 mb-1 uppercase tracking-widest">
-                            {msg.role === 'user' ? `>> ${translations[lang].pilot}` : `:: ${translations[lang].system}`}
-                        </span>
-                        {msg.content}
+            <div className="flex flex-col gap-4">
+                {messages.length === 0 && (
+                    <div className="h-full flex flex-col items-center justify-center text-gray-600 opacity-50 font-mono">
+                        <p>NO SIGNAL</p>
                     </div>
-                </div>
-            ))}
+                )}
+
+                {messages.map((msg) => (
+                    <div
+                        key={msg.id}
+                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                        <div
+                            className={`max-w-[80%] p-3 rounded-md text-sm md:text-base leading-relaxed ${msg.role === 'user'
+                                    ? 'bg-deep-sea border border-terminal-dim/50 text-gray-200'
+                                    : 'bg-transparent text-terminal-green'
+                                }`}
+                        >
+                            {msg.role === 'system' && <span className="mr-2 opacity-50 font-mono text-xs">::</span>}
+
+                            {msg.isGlitch ? (
+                                <GlitchText text={msg.content} intensity="high" className="text-alert-red" />
+                            ) : (
+                                msg.content
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

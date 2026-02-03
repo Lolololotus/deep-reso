@@ -1,44 +1,48 @@
 export type Language = 'en' | 'ko';
 
 export const translations = {
-    en: {
-        title: "DEEP_RESO_PROTOCOL",
-        system_init: "System initialized. Connection established to the Sea of Thought. Resolution at 0%. Begin transmission.",
-        res_metric: "RESOLUTION_METRIC",
-        input_placeholder: "Input command...",
-        system_busy: "SYSTEM_BUSY...",
-        enter_key: "ENTER",
-        pilot: "PILOT",
-        system: "SYSTEM",
-        status_online: "System: ONLINE",
-        latency: "Latency: 12ms",
-        secure: "Secure: YES",
-        warning_sink: "SINK. That word is a nebulous defense mechanism. Respond with higher resolution.",
-        res_increase: "Resolution increased to {val}%. Continue deeper.",
-        no_data: "NO DATA DETECTED",
-        begin_transmission: "Begin transmission...",
-        hello_title: "Hello, Deep-Reso",
-        hello_subtitle: "[SYSTEM INITIALIZED]\nConnection established to the Sea of Thought.",
-        status_res: "RES"
-    },
     ko: {
-        title: "심층_해상도_프로토콜",
-        system_init: "시스템 초기화 완료. 사유의 바다에 연결되었습니다. 현재 해상도 0%. 송신을 시작하십시오.",
-        res_metric: "해상도_수치",
-        input_placeholder: "명령어 입력...",
-        system_busy: "시스템_처리중...",
-        enter_key: "엔터",
-        pilot: "파일럿",
-        system: "시스템",
-        status_online: "시스템: 온라인",
-        latency: "지연시간: 12ms",
-        secure: "보안: 정상",
-        warning_sink: "격침. 해당 단어는 안개와 같은 방어 기제입니다. 더 정교한 언어로 응사하십시오.",
-        res_increase: "해상도가 {val}%로 상승했습니다. 더 깊이 잠항합니다.",
-        no_data: "데이터 없음",
-        begin_transmission: "송신 시작...",
-        hello_title: "안녕, Deep-Reso",
-        hello_subtitle: "[시스템 초기화됨]\n사유의 바다와 연결되었습니다.",
-        status_res: "해상도"
+        title: "[ 사유의 해상전 : 금지된 단어들 ]",
+        system_init: ":: 시스템 가동. [사유의 해상전 : 금지된 단어들] 프로토콜에 접속합니다. 마지막으로 당신이 뱉은 말은 무엇입니까?",
+        input_placeholder: "당신의 사유를 송신하십시오...",
+        res_metric: "해상도",
+        status_online: "연결됨",
+        latency: "32ms",
+        secure: "보안",
+        scanning: "검역 중... 위장된 언어 감지 중...",
+        res_increase: "해상도 상승. 덮여있던 의미가 +{val}% 선명해집니다.",
+        gem_found: "축하합니다. 순도 100%의 사유를 정제했습니다. 이 문장은 '보석함'에 영구 보존됩니다.",
+        last_breath: "함장님, 지금 막막한 것은 당신이 진실에 너무 가까워졌기 때문입니다. 잠시 숨을 고르고, 머리가 아닌 '심장'이 먼저 뱉는 단어를 써보십시오.",
+        digging: {
+            origin: "그 '{keyword}'의 원형은 무엇입니까? 타인의 기대입니까, 스스로의 압박입니까?",
+            sensation: "그 '{keyword}'의 질감을 묘사하십시오. 무거운 압박입니까, 날카로운 찔림입니까?",
+            substitution: "그 '{keyword}'의 빈자리를 채울 당신만의 '온도'나 '색깔'은 무엇입니까?",
+            prelude: ":: 심층 해부 프로토콜 가동. 키워드 감지: [{keyword}]"
+        },
+        guide_nudge: "망설임은 사유의 밀도를 낮춥니다. 지금 느껴지는 '막막함'을 형용사 없이 묘사해보십시오.",
+        system_busy: "시스템 처리 중...",
+        enter_key: "ENTER"
+    },
+    en: {
+        title: "[ Deep-Reso : The Forbidden Words ]",
+        system_init: ":: SYSTEM ONLINE. Connecting to [Deep-Reso : The Forbidden Words] protocol. What was the last thing you said?",
+        input_placeholder: "Transmit your thought...",
+        res_metric: "RESOLUTION",
+        status_online: "ONLINE",
+        latency: "32ms",
+        secure: "SECURE",
+        scanning: "SCANNING... DETECTING CAMOUFLAGE...",
+        res_increase: "Resolution Increased. Meaning clarified by +{val}%.",
+        gem_found: "Congratulations. You have distilled a thought of 100% purity. It is now preserved in the Gem Box.",
+        last_breath: "Captain, if you feel lost, it is because you are close to the truth. Breathe. Let your heart speak first.",
+        digging: {
+            origin: "What is the archetype of '{keyword}'? Is it expectation from others, or pressure from within?",
+            sensation: "Describe the texture of '{keyword}'. Is it a heavy pressure, or a sharp sting?",
+            substitution: "What 'color' or 'temperature' fills the void of '{keyword}'?",
+            prelude: ":: DEEP DISSECTION PROTOCOL. KEYWORD: [{keyword}]"
+        },
+        guide_nudge: "Hesitation lowers thought density. Describe your current 'block' without using adjectives.",
+        system_busy: "SYSTEM PROCESSING...",
+        enter_key: "ENTER"
     }
 };

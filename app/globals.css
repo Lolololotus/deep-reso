@@ -20,6 +20,118 @@
   --font-serif: var(--font-serif-kr);
 }
 
+@keyframes glitch-1 {
+  0% {
+    clip-path: inset(20% 0 80% 0);
+    transform: translate(-2px, 1px);
+  }
+
+  20% {
+    clip-path: inset(60% 0 10% 0);
+    transform: translate(2px, -1px);
+  }
+
+  40% {
+    clip-path: inset(40% 0 50% 0);
+    transform: translate(-2px, 2px);
+  }
+
+  60% {
+    clip-path: inset(80% 0 5% 0);
+    transform: translate(2px, -2px);
+  }
+
+  80% {
+    clip-path: inset(10% 0 70% 0);
+    transform: translate(-1px, 1px);
+  }
+
+  100% {
+    clip-path: inset(30% 0 20% 0);
+    transform: translate(1px, -1px);
+  }
+}
+
+@keyframes glitch-2 {
+  0% {
+    clip-path: inset(10% 0 60% 0);
+    transform: translate(2px, -1px);
+  }
+
+  20% {
+    clip-path: inset(80% 0 5% 0);
+    transform: translate(-2px, 2px);
+  }
+
+  40% {
+    clip-path: inset(30% 0 20% 0);
+    transform: translate(2px, 1px);
+  }
+
+  60% {
+    clip-path: inset(10% 0 80% 0);
+    transform: translate(-2px, -2px);
+  }
+
+  80% {
+    clip-path: inset(50% 0 30% 0);
+    transform: translate(1px, 2px);
+  }
+
+  100% {
+    clip-path: inset(20% 0 70% 0);
+    transform: translate(-1px, -1px);
+  }
+}
+
+@keyframes deep-pulse {
+
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+
+  50% {
+    opacity: 0.25;
+    transform: scale(1.02);
+    filter: blur(1px);
+  }
+
+  90% {
+    opacity: 0.15;
+    transform: scale(0.98);
+    filter: blur(2px);
+  }
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.animate-glitch-1 {
+  animation: glitch-1 2.5s infinite linear alternate-reverse;
+}
+
+.animate-glitch-2 {
+  animation: glitch-2 3s infinite linear alternate-reverse;
+}
+
+.animate-deep-pulse {
+  animation: deep-pulse 8s infinite ease-in-out;
+}
+
+.animate-scanline {
+  animation: scanline 8s linear infinite;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);

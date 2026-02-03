@@ -70,7 +70,7 @@ export default function Home() {
     }
   }, [messages, lang, showIntro]);
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = async (content: string) => {
     // 1. User Message
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -80,87 +80,162 @@ export default function Home() {
     setMessages(prev => [...prev, newMessage]);
     setIsScanning(true);
 
-    // 2. Logic Check
-    setTimeout(() => {
-      // Updated checkInput with recentTemplates (v3.1)
-      const checkResult = checkInput(content, lang, resolution, recentTemplates);
+    // AI / Local Logic
+    try {
+      // Attempt AI Analysis
+      // We add a minimum delay for the "processing" feel + Glitch
+      const minDelay = new Promise(resolve => setTimeout(resolve, 1500));
+
+      let aiData = null;
+      let useLocal = false;
+
+      // Determine if we should try AI (maybe skip if offline or known error?)
+      // For now always try.
+      const apiCall = fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: content, lang })
+      }).then(res => {
+        if (!res.ok) throw new Error("API Failure");
+        return res.json();
+      });
+
+      // Race/Wait
+      try {
+        await minDelay; // Ensure visual delay
+        aiData = await apiCall;
+      } catch (e) {
+        console.warn("AI System Offline, switching to auxiliary power (Local Logic).", e);
+        useLocal = true;
+      }
+
       setIsScanning(false);
 
-      if (!checkResult.isValid) {
-        // FAILURE
-        const newFailCount = consecutiveFailures + 1;
-        setConsecutiveFailures(newFailCount);
+      if (!useLocal && aiData && !aiData.error) {
+        // === AI SUCCESS PATH ===
+        // aiData: { analysis_signal, dissection_phrase, deep_question, resolution_score }
 
-        if (checkResult.penalty) {
-          const newRes = calculateNewResolution(resolution, -checkResult.penalty);
-          setResolution(newRes);
+        const newRes = aiData.resolution_score;
+        // We might want to smooth the transition or just set it. 
+        // Let's use our calculateNewResolution to add the 'change' or just take the score?
+        // "Real-time AI" implies it judges this specific input. 
+        // But game loop accumulates. Let's make it add/sub based on score relative to current?
+        // Or just trust the AI score as the new truth? The gauge is accumulation.
+        // Let's interpret score: < 40 = penalty, > 60 = reward.
+
+        let resChange = 0;
+        if (newRes < 40) resChange = -5;
+        else if (newRes < 60) resChange = 5;
+        else resChange = 15; // High qual
+
+        const nextResolution = calculateNewResolution(resolution, resChange);
+        setResolution(nextResolution);
+
+        // Construct Response
+        const responseContent = `${aiData.analysis_signal}\n\n${aiData.dissection_phrase}\n\n"${aiData.deep_question}"`;
+
+        setTimeout(() => {
+          setMessages(prev => [...prev, {
+            id: Date.now().toString() + '-sys-ai',
+            role: 'system',
+            content: responseContent,
+            isGlitch: newRes < 40 // Glitch if low res
+          }]);
+        }, 300);
+
+        // Gem Logic for AI?
+        if (nextResolution >= 100) {
+          setTimeout(() => {
+            setGems(prev => [...prev, content]);
+            setResolution(0);
+            setMessages(prev => [...prev, {
+              id: Date.now().toString() + '-gem',
+              role: 'system',
+              content: translations[lang].gem_found
+            }]);
+          }, 1000);
         }
 
-        if (newFailCount >= 3) {
-          setTimeout(() => {
-            setMessages(prev => [...prev, {
-              id: Date.now().toString() + '-sys-rescue',
-              role: 'system',
-              content: translations[lang].last_breath,
-              isGlitch: false
-            }]);
-            setConsecutiveFailures(0);
-          }, 800);
+      } else {
+        // === LOCAL FALLBACK PATH (v3.1) ===
+        const checkResult = checkInput(content, lang, resolution, recentTemplates);
+
+        if (!checkResult.isValid) {
+          // FAILURE
+          const newFailCount = consecutiveFailures + 1;
+          setConsecutiveFailures(newFailCount);
+
+          if (checkResult.penalty) {
+            const newRes = calculateNewResolution(resolution, -checkResult.penalty);
+            setResolution(newRes);
+          }
+
+          if (newFailCount >= 3) {
+            setTimeout(() => {
+              setMessages(prev => [...prev, {
+                id: Date.now().toString() + '-sys-rescue',
+                role: 'system',
+                content: translations[lang].last_breath,
+                isGlitch: false
+              }]);
+              setConsecutiveFailures(0);
+            }, 500);
+          } else {
+            setTimeout(() => {
+              setMessages(prev => [...prev, {
+                id: Date.now().toString() + '-sys',
+                role: 'system',
+                content: checkResult.message || "ERROR",
+                isGlitch: checkResult.isGlitch
+              }]);
+            }, 500);
+          }
         } else {
+          // SUCCESS
+          setConsecutiveFailures(0);
+          if (checkResult.usedQuestionId) {
+            setRecentTemplates(prev => {
+              const newQueue = [...prev, checkResult.usedQuestionId!];
+              if (newQueue.length > 5) newQueue.shift();
+              return newQueue;
+            });
+          }
+
+          const reward = checkResult.reward || 10;
+          let newResolution = calculateNewResolution(resolution, reward);
+          let responseMsg = "";
+
+          if (newResolution >= 100) {
+            setGems(prev => [...prev, content]);
+            newResolution = 0;
+            responseMsg = translations[lang].gem_found;
+          } else if (newResolution === 98) {
+            responseMsg = lang === 'ko'
+              ? "마지막 안개 한 겹이 남았습니다. 당신의 진심을 단 한 방울만 더 보태십시오."
+              : "One final layer of fog remains. Add just one more drop of truth.";
+          } else if (checkResult.diggingMessage) {
+            responseMsg = checkResult.diggingMessage;
+          } else {
+            responseMsg = checkResult.message || translations[lang].res_increase.replace('{val}', newResolution.toString());
+          }
+
+          setResolution(newResolution);
+
           setTimeout(() => {
             setMessages(prev => [...prev, {
               id: Date.now().toString() + '-sys',
               role: 'system',
-              content: checkResult.message || "ERROR",
-              isGlitch: checkResult.isGlitch
+              content: responseMsg,
+              isGlitch: !!checkResult.isGlitch || !!checkResult.diggingMessage
             }]);
           }, 500);
         }
-
-      } else {
-        // SUCCESS
-        setConsecutiveFailures(0);
-
-        // Update Anti-Repetition Queue
-        if (checkResult.usedQuestionId) {
-          setRecentTemplates(prev => {
-            const newQueue = [...prev, checkResult.usedQuestionId!];
-            if (newQueue.length > 5) newQueue.shift(); // Keep last 5
-            return newQueue;
-          });
-        }
-
-        const reward = checkResult.reward || 10;
-        let newResolution = calculateNewResolution(resolution, reward);
-        let responseMsg = "";
-
-        if (newResolution >= 100) {
-          setGems(prev => [...prev, content]);
-          newResolution = 0;
-          responseMsg = translations[lang].gem_found;
-        } else if (newResolution === 98) {
-          responseMsg = lang === 'ko'
-            ? "마지막 안개 한 겹이 남았습니다. 당신의 진심을 단 한 방울만 더 보태십시오."
-            : "One final layer of fog remains. Add just one more drop of truth.";
-        } else if (checkResult.diggingMessage) {
-          // Digging Engine Triggered
-          responseMsg = checkResult.diggingMessage;
-        } else {
-          responseMsg = checkResult.message || translations[lang].res_increase.replace('{val}', newResolution.toString());
-        }
-
-        setResolution(newResolution);
-
-        setTimeout(() => {
-          setMessages(prev => [...prev, {
-            id: Date.now().toString() + '-sys',
-            role: 'system',
-            content: responseMsg,
-            isGlitch: !!checkResult.isGlitch || !!checkResult.diggingMessage
-          }]);
-        }, 500);
       }
-    }, 1200);
+
+    } catch (err) {
+      console.error("Critical Error", err);
+      setIsScanning(false);
+    }
   };
 
   const t = translations[lang];

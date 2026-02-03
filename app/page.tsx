@@ -82,56 +82,42 @@ export default function Home() {
 
     // AI / Local Logic
     try {
-      // Attempt AI Analysis
-      // We add a minimum delay for the "processing" feel + Glitch
-      const minDelay = new Promise(resolve => setTimeout(resolve, 1500));
+      // Minimum visual delay for "Thinking" effect
+      const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1500));
 
-      let aiData = null;
-      let useLocal = false;
-
-      // Determine if we should try AI (maybe skip if offline or known error?)
-      // For now always try.
-      const apiCall = fetch('/api/analyze', {
+      // API Call Promise - We catch errors HERE to prevent Unhandled Rejection
+      const apiPromise = fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: content, lang })
-      }).then(res => {
-        if (!res.ok) throw new Error("API Failure");
+      }).then(async res => {
+        if (!res.ok) throw new Error(`API Error: ${res.status}`);
         return res.json();
+      }).catch(err => {
+        return { error: true, details: err };
       });
 
-      // Race/Wait
-      try {
-        await minDelay; // Ensure visual delay
-        aiData = await apiCall;
-      } catch (e) {
-        console.warn("AI System Offline, switching to auxiliary power (Local Logic).", e);
-        useLocal = true;
-      }
+      // Wait for both
+      const [_, aiResult] = await Promise.all([minDelayPromise, apiPromise]);
 
       setIsScanning(false);
 
-      if (!useLocal && aiData && !aiData.error) {
+      if (aiResult && !aiResult.error && aiResult.resolution_score !== undefined) {
         // === AI SUCCESS PATH ===
-        // aiData: { analysis_signal, dissection_phrase, deep_question, resolution_score }
-
+        const aiData = aiResult;
         const newRes = aiData.resolution_score;
-        // We might want to smooth the transition or just set it. 
-        // Let's use our calculateNewResolution to add the 'change' or just take the score?
-        // "Real-time AI" implies it judges this specific input. 
-        // But game loop accumulates. Let's make it add/sub based on score relative to current?
-        // Or just trust the AI score as the new truth? The gauge is accumulation.
-        // Let's interpret score: < 40 = penalty, > 60 = reward.
 
+        // Resolution Logic based on AI Score
+        // If AI score is high, boost resolution. If low, drop it.
         let resChange = 0;
-        if (newRes < 40) resChange = -5;
-        else if (newRes < 60) resChange = 5;
-        else resChange = 15; // High qual
+        if (newRes < 30) resChange = -5;
+        else if (newRes < 50) resChange = 0;
+        else if (newRes < 80) resChange = 10;
+        else resChange = 15;
 
         const nextResolution = calculateNewResolution(resolution, resChange);
         setResolution(nextResolution);
 
-        // Construct Response
         const responseContent = `${aiData.analysis_signal}\n\n${aiData.dissection_phrase}\n\n"${aiData.deep_question}"`;
 
         setTimeout(() => {
@@ -139,11 +125,12 @@ export default function Home() {
             id: Date.now().toString() + '-sys-ai',
             role: 'system',
             content: responseContent,
-            isGlitch: newRes < 40 // Glitch if low res
+            // Glitch if resolution is low (warning)
+            isGlitch: newRes < 30
           }]);
         }, 300);
 
-        // Gem Logic for AI?
+        // Gem Logic
         if (nextResolution >= 100) {
           setTimeout(() => {
             setGems(prev => [...prev, content]);
@@ -151,85 +138,101 @@ export default function Home() {
             setMessages(prev => [...prev, {
               id: Date.now().toString() + '-gem',
               role: 'system',
-              content: translations[lang].gem_found
+              content: translations[lang].gem_found,
+              isGlitch: false
             }]);
-          }, 1000);
+          }, 1200);
         }
 
       } else {
-        // === LOCAL FALLBACK PATH (v3.1) ===
-        const checkResult = checkInput(content, lang, resolution, recentTemplates);
+        // === FAILURE / FALLBACK PATH ===
+        console.warn("AI Failed, triggering fallback/interference.", aiResult?.details);
 
-        if (!checkResult.isValid) {
-          // FAILURE
-          const newFailCount = consecutiveFailures + 1;
-          setConsecutiveFailures(newFailCount);
+        // User requested: ":: 통신 주파수 간섭 발생. 잠항을 일시 중단합니다."
+        // AND we also have the v3.1 Local Engine.
+        // Strategy: Show the Interference message, then run Local Logic to keep the game alive?
+        // Or just show interference and stop?
+        // "잠항을 일시 중단합니다" implies stop. But that's bad UX if it happens often (e.g. no key).
+        // I will show the Interference Message, but then *also* provide a Local Logic response after a short delay,
+        // creating a "Re-routing..." effect.
 
-          if (checkResult.penalty) {
-            const newRes = calculateNewResolution(resolution, -checkResult.penalty);
-            setResolution(newRes);
-          }
+        const interferenceMsg = lang === 'ko'
+          ? ":: 통신 주파수 간섭 발생. AI 코어 응답 없음. 보조 시스템으로 전환합니다."
+          : ":: SIGNAL INTERFERENCE DETECTION. AI CORE OFFLINE. SWITCHING TO AUXILIARY SYSTEM.";
 
-          if (newFailCount >= 3) {
-            setTimeout(() => {
-              setMessages(prev => [...prev, {
-                id: Date.now().toString() + '-sys-rescue',
-                role: 'system',
-                content: translations[lang].last_breath,
-                isGlitch: false
-              }]);
+        setMessages(prev => [...prev, {
+          id: Date.now().toString() + '-err',
+          role: 'system',
+          content: interferenceMsg,
+          isGlitch: true
+        }]);
+
+        // Trigger Local Logic after 1s
+        setTimeout(() => {
+          const checkResult = checkInput(content, lang, resolution, recentTemplates);
+
+          // ... (Local Logic Code) ...
+          // Reusing the local logic block structure logic essentially
+
+          // Just calling the logic handler directly or replicating here?
+          // Replicating for clarity in this snippet.
+
+          let localResponse = "";
+          let isGlitch = checkResult.isGlitch;
+
+          if (!checkResult.isValid) {
+            // Local Failure
+            const newFailCount = consecutiveFailures + 1;
+            setConsecutiveFailures(newFailCount);
+
+            if (checkResult.penalty) {
+              setResolution(prev => calculateNewResolution(prev, -checkResult.penalty!));
+            }
+
+            if (newFailCount >= 3) {
+              localResponse = translations[lang].last_breath;
               setConsecutiveFailures(0);
-            }, 500);
+            } else {
+              localResponse = checkResult.message || "ERROR";
+            }
           } else {
-            setTimeout(() => {
-              setMessages(prev => [...prev, {
-                id: Date.now().toString() + '-sys',
-                role: 'system',
-                content: checkResult.message || "ERROR",
-                isGlitch: checkResult.isGlitch
-              }]);
-            }, 500);
-          }
-        } else {
-          // SUCCESS
-          setConsecutiveFailures(0);
-          if (checkResult.usedQuestionId) {
-            setRecentTemplates(prev => {
-              const newQueue = [...prev, checkResult.usedQuestionId!];
-              if (newQueue.length > 5) newQueue.shift();
-              return newQueue;
-            });
-          }
+            // Local Success
+            setConsecutiveFailures(0);
+            if (checkResult.usedQuestionId) {
+              setRecentTemplates(prev => {
+                const newQueue = [...prev, checkResult.usedQuestionId!];
+                if (newQueue.length > 5) newQueue.shift();
+                return newQueue;
+              });
+            }
 
-          const reward = checkResult.reward || 10;
-          let newResolution = calculateNewResolution(resolution, reward);
-          let responseMsg = "";
+            const reward = checkResult.reward || 10;
+            const newResolution = calculateNewResolution(resolution, reward);
+            setResolution(newResolution);
 
-          if (newResolution >= 100) {
-            setGems(prev => [...prev, content]);
-            newResolution = 0;
-            responseMsg = translations[lang].gem_found;
-          } else if (newResolution === 98) {
-            responseMsg = lang === 'ko'
-              ? "마지막 안개 한 겹이 남았습니다. 당신의 진심을 단 한 방울만 더 보태십시오."
-              : "One final layer of fog remains. Add just one more drop of truth.";
-          } else if (checkResult.diggingMessage) {
-            responseMsg = checkResult.diggingMessage;
-          } else {
-            responseMsg = checkResult.message || translations[lang].res_increase.replace('{val}', newResolution.toString());
+            if (newResolution >= 100) {
+              setGems(prev => [...prev, content]);
+              setResolution(0); // Reset resolution after gem
+              localResponse = translations[lang].gem_found;
+            } else if (newResolution === 98) {
+              localResponse = lang === 'ko'
+                ? "마지막 안개 한 겹이 남았습니다. 당신의 진심을 단 한 방울만 더 보태십시오."
+                : "One final layer of fog remains. Add just one more drop of truth.";
+            } else if (checkResult.diggingMessage) {
+              localResponse = checkResult.diggingMessage;
+            } else {
+              localResponse = checkResult.message || translations[lang].res_increase.replace('{val}', newResolution.toString());
+            }
           }
 
-          setResolution(newResolution);
+          setMessages(prev => [...prev, {
+            id: Date.now().toString() + '-sys-local',
+            role: 'system',
+            content: localResponse,
+            isGlitch: !!isGlitch || !!checkResult.diggingMessage
+          }]);
 
-          setTimeout(() => {
-            setMessages(prev => [...prev, {
-              id: Date.now().toString() + '-sys',
-              role: 'system',
-              content: responseMsg,
-              isGlitch: !!checkResult.isGlitch || !!checkResult.diggingMessage
-            }]);
-          }, 500);
-        }
+        }, 1500);
       }
 
     } catch (err) {

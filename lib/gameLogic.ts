@@ -1,3 +1,5 @@
+import { translations, Language } from './translations';
+
 export const BANNED_WORDS = [
     "오글거려",
     "짜증나",
@@ -10,20 +12,30 @@ export const BANNED_WORDS = [
     "글쎄"
 ];
 
-export const WARNING_MESSAGE = "격침. 해당 단어는 안개와 같은 방어 기제입니다. 더 정교한 언어로 응사하십시오.";
+// Simple English banned words for demo purposes
+export const BANNED_WORDS_EN = [
+    "just",
+    "whatever",
+    "idk",
+    "dunno",
+    "boring"
+];
 
 export interface GameState {
     resolution: number;
     isGameOver: boolean;
 }
 
-export function checkInput(input: string): { isValid: boolean; message?: string } {
-    const lowerInput = input.trim(); // Korean doesn't have case usually but good practice
+export function checkInput(input: string, lang: Language = 'ko'): { isValid: boolean; message?: string } {
+    const lowerInput = input.trim().toLowerCase();
+
+    const targetBannedWords = lang === 'ko' ? BANNED_WORDS : BANNED_WORDS_EN;
+    const warningMsg = translations[lang].warning_sink;
 
     // Check for banned words
-    for (const word of BANNED_WORDS) {
+    for (const word of targetBannedWords) {
         if (lowerInput.includes(word)) {
-            return { isValid: false, message: WARNING_MESSAGE };
+            return { isValid: false, message: warningMsg };
         }
     }
 

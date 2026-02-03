@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { translations, Language } from '@/lib/translations';
 
 interface Message {
     id: string;
@@ -8,9 +9,10 @@ interface Message {
 
 interface ChatWindowProps {
     messages: Message[];
+    lang: Language;
 }
 
-export function ChatWindow({ messages }: ChatWindowProps) {
+export function ChatWindow({ messages, lang }: ChatWindowProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -26,8 +28,8 @@ export function ChatWindow({ messages }: ChatWindowProps) {
         >
             {messages.length === 0 && (
                 <div className="h-full flex flex-col items-center justify-center text-gray-600 opacity-50">
-                    <p>NO DATA DETECTED</p>
-                    <p className="text-xs mt-2">Begin transmission...</p>
+                    <p>{translations[lang].no_data}</p>
+                    <p className="text-xs mt-2">{translations[lang].begin_transmission}</p>
                 </div>
             )}
 
@@ -44,7 +46,7 @@ export function ChatWindow({ messages }: ChatWindowProps) {
                             }`}
                     >
                         <span className="block text-[10px] opacity-50 mb-1 uppercase tracking-widest">
-                            {msg.role === 'user' ? '>> PILOT' : ':: SYSTEM'}
+                            {msg.role === 'user' ? `>> ${translations[lang].pilot}` : `:: ${translations[lang].system}`}
                         </span>
                         {msg.content}
                     </div>

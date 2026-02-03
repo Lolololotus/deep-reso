@@ -1,10 +1,12 @@
 import React from 'react';
+import { translations, Language } from '@/lib/translations';
 
 interface ResolutionGaugeProps {
     value: number; // 0 to 100
+    lang: Language;
 }
 
-export function ResolutionGauge({ value }: ResolutionGaugeProps) {
+export function ResolutionGauge({ value, lang }: ResolutionGaugeProps) {
     // Ensure value is between 0 and 100
     const clampedValue = Math.min(100, Math.max(0, value));
 
@@ -15,7 +17,7 @@ export function ResolutionGauge({ value }: ResolutionGaugeProps) {
     return (
         <div className="w-full max-w-3xl mb-6 font-mono">
             <div className="flex justify-between text-xs md:text-sm text-terminal-dim mb-1">
-                <span>RESOLUTION_METRIC</span>
+                <span>{translations[lang].res_metric}</span>
                 <span>{clampedValue.toFixed(1)}%</span>
             </div>
             <div className="relative h-4 w-full bg-gray-900 border border-gray-700 overflow-hidden">

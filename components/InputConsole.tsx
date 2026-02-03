@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState, FormEvent, useRef, useEffect } from 'react';
+import { translations, Language } from '@/lib/translations';
 
 interface InputConsoleProps {
     onSendMessage: (message: string) => void;
     disabled?: boolean;
+    lang: Language;
 }
 
-export function InputConsole({ onSendMessage, disabled }: InputConsoleProps) {
+export function InputConsole({ onSendMessage, disabled, lang }: InputConsoleProps) {
     const [input, setInput] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -37,11 +39,11 @@ export function InputConsole({ onSendMessage, disabled }: InputConsoleProps) {
                     onChange={(e) => setInput(e.target.value)}
                     disabled={disabled}
                     className="flex-1 bg-transparent text-foreground outline-none font-mono placeholder-gray-700 disabled:opacity-50"
-                    placeholder={disabled ? "SYSTEM_BUSY..." : "Input command..."}
+                    placeholder={disabled ? translations[lang].system_busy : translations[lang].input_placeholder}
                     autoComplete="off"
                 />
                 <div className="absolute right-3 top-3 text-[10px] text-gray-600 border border-gray-800 px-1">
-                    ENTER
+                    {translations[lang].enter_key}
                 </div>
             </div>
         </form>

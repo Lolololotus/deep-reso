@@ -118,7 +118,12 @@ export default function Home() {
         const nextResolution = calculateNewResolution(resolution, resChange);
         setResolution(nextResolution);
 
-        const responseContent = `${aiData.analysis_signal}\n\n${aiData.dissection_phrase}\n\n"${aiData.deep_question}"`;
+        // 3-Line Format Construction
+        const line1 = `${aiData.analysis_signal} ${aiData.dissection_phrase}`;
+        const line2 = `"${aiData.deep_question}"`;
+        const line3 = aiData.action_prompt || "다시 송신하십시오.";
+
+        const responseContent = `${line1}\n${line2}\n${line3}`;
 
         setTimeout(() => {
           setMessages(prev => [...prev, {
@@ -157,8 +162,8 @@ export default function Home() {
         // creating a "Re-routing..." effect.
 
         const interferenceMsg = lang === 'ko'
-          ? ":: 통신 주파수 간섭 발생. AI 코어 응답 없음. 보조 시스템으로 전환합니다."
-          : ":: SIGNAL INTERFERENCE DETECTION. AI CORE OFFLINE. SWITCHING TO AUXILIARY SYSTEM.";
+          ? ":: 심해 신호가 약해 잠시 교신이 끊겼습니다. 보조 시스템으로 전환합니다."
+          : ":: Deep sea signal weak. Connection lost. Switching to auxiliary system.";
 
         setMessages(prev => [...prev, {
           id: Date.now().toString() + '-err',
@@ -246,41 +251,45 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-8 bg-background text-foreground relative overflow-hidden font-serif">
 
-      {showIntro && <ManifestoIntro lang={lang} onComplete={() => setShowIntro(false)} />}
+      {showIntro ? (
+        <ManifestoIntro lang={lang} onComplete={() => setShowIntro(false)} />
+      ) : (
+        <>
+          <LanguageSwitcher currentLang={lang} onToggle={setLang} />
 
-      <LanguageSwitcher currentLang={lang} onToggle={setLang} />
+          <div className="absolute inset-0 z-0 pointer-events-none opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-deep-sea to-black"></div>
+          <div className="absolute inset-0 z-0 pointer-events-none opacity-10 animate-deep-pulse bg-[url('/noise.svg')]"></div>
+          <div className="fixed inset-0 pointer-events-none z-[50] opacity-5 bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_51%)] bg-[length:100%_4px] animate-scanline"></div>
 
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-deep-sea to-black"></div>
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-10 animate-deep-pulse bg-[url('/noise.png')]"></div>
-      <div className="fixed inset-0 pointer-events-none z-[50] opacity-5 bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_51%)] bg-[length:100%_4px] animate-scanline"></div>
+          <div className="z-10 w-full flex flex-col items-center max-w-3xl gap-6">
 
-      <div className="z-10 w-full flex flex-col items-center max-w-3xl gap-6">
+            <h1 className="text-xl md:text-3xl font-bold text-terminal-green tracking-widest mb-2 opacity-90 font-serif text-center">
+              <GlitchText text={t.title} intensity="medium" />
+            </h1>
 
-        <h1 className="text-xl md:text-3xl font-bold text-terminal-green tracking-widest mb-2 opacity-90 font-serif text-center">
-          <GlitchText text={t.title} intensity="medium" />
-        </h1>
+            <ResolutionGauge value={resolution} lang={lang} />
 
-        <ResolutionGauge value={resolution} lang={lang} />
+            <ChatWindow messages={messages} lang={lang} />
 
-        <ChatWindow messages={messages} lang={lang} />
+            <div className={`h-6 text-xs font-mono text-alert-red tracking-widest transition-opacity duration-300 ${isScanning ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>
+              {t.scanning}
+            </div>
 
-        <div className={`h-6 text-xs font-mono text-alert-red tracking-widest transition-opacity duration-300 ${isScanning ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>
-          {t.scanning}
-        </div>
+            <InputConsole onSendMessage={handleSendMessage} lang={lang} disabled={isScanning} />
 
-        <InputConsole onSendMessage={handleSendMessage} lang={lang} disabled={showIntro || isScanning} />
+            <div className="flex gap-4 mt-4 text-[10px] text-gray-600 uppercase font-mono">
+              <span>{t.status_online}</span>
+              <span>{t.latency}</span>
+              <span>{t.secure}</span>
+              <span className={resolution < 30 ? "text-alert-red animate-pulse" : "text-terminal-dim"}>
+                SIGNAL_STABILITY: {Math.max(0, 100 - resolution)}%
+              </span>
+            </div>
+          </div>
 
-        <div className="flex gap-4 mt-4 text-[10px] text-gray-600 uppercase font-mono">
-          <span>{t.status_online}</span>
-          <span>{t.latency}</span>
-          <span>{t.secure}</span>
-          <span className={resolution < 30 ? "text-alert-red animate-pulse" : "text-terminal-dim"}>
-            SIGNAL_STABILITY: {Math.max(0, 100 - resolution)}%
-          </span>
-        </div>
-      </div>
-
-      <GemBox gems={gems} />
+          <GemBox gems={gems} />
+        </>
+      )}
     </main>
   );
 }

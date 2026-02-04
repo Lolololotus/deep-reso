@@ -1,25 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 interface ManifestoIntroProps {
     onComplete: () => void;
     lang: 'en' | 'ko';
 }
 
+const CONTENT_KO = [
+    "세상은 소음으로 가득 차 있습니다.",
+    "당신의 생각은 타인의 언어로 오염되었습니다.",
+    "이제, 깊은 바다로 잠항하여...",
+    "당신의 진짜 목소리를 인양하십시오."
+];
+
+const CONTENT_EN = [
+    "The world is full of noise.",
+    "Your thoughts are polluted by others' words.",
+    "Now, dive into the deep sea...",
+    "And salvage your true voice."
+];
+
 export function ManifestoIntro({ onComplete, lang }: ManifestoIntroProps) {
     const [step, setStep] = useState(0);
     const [displayedText, setDisplayedText] = useState("");
 
-    const content = lang === 'ko' ? [
-        "세상은 소음으로 가득 차 있습니다.",
-        "당신의 생각은 타인의 언어로 오염되었습니다.",
-        "이제, 깊은 바다로 잠항하여...",
-        "당신의 진짜 목소리를 인양하십시오."
-    ] : [
-        "The world is full of noise.",
-        "Your thoughts are polluted by others' words.",
-        "Now, dive into the deep sea...",
-        "And salvage your true voice."
-    ];
+    const content = lang === 'ko' ? CONTENT_KO : CONTENT_EN;
 
     useEffect(() => {
         if (step >= content.length) return;
@@ -27,6 +31,9 @@ export function ManifestoIntro({ onComplete, lang }: ManifestoIntroProps) {
         let currentText = "";
         const targetText = content[step];
         let charIndex = 0;
+
+        // Reset text for new step
+        setDisplayedText("");
 
         // Typing effect
         const timer = setInterval(() => {
@@ -44,7 +51,7 @@ export function ManifestoIntro({ onComplete, lang }: ManifestoIntroProps) {
         }, 50); // Speed
 
         return () => clearInterval(timer);
-    }, [step, lang]);
+    }, [step, lang, content]);
 
     return (
         <div className="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center p-8 text-center">
@@ -64,3 +71,4 @@ export function ManifestoIntro({ onComplete, lang }: ManifestoIntroProps) {
         </div>
     );
 }
+

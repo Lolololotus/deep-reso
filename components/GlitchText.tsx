@@ -14,7 +14,7 @@ export function GlitchText({ text, as: Component = 'span', className = '', inten
 
             {/* Glitch Layer 1 (Red/Cyan Offset) */}
             <span
-                className={`absolute top-0 left-0 -z-10 w-full h-full text-alert-red opacity-70 animate-glitch-1 hidden group-hover:block ${intensity === 'high' ? 'block' : ''}`}
+                className={`absolute top-0 left-0 -z-10 w-full h-full text-alert-red opacity-70 animate-glitch-1 block ${intensity === 'high' ? 'block' : ''}`}
                 aria-hidden="true"
             >
                 {text}
@@ -22,7 +22,7 @@ export function GlitchText({ text, as: Component = 'span', className = '', inten
 
             {/* Glitch Layer 2 (Blue/Magenta Offset) */}
             <span
-                className={`absolute top-0 left-0 -z-10 w-full h-full text-terminal-green opacity-70 animate-glitch-2 hidden group-hover:block ${intensity === 'high' ? 'block' : ''}`}
+                className={`absolute top-0 left-0 -z-10 w-full h-full text-terminal-green opacity-70 animate-glitch-2 block ${intensity === 'high' ? 'block' : ''}`}
                 aria-hidden="true"
             >
                 {text}

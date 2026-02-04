@@ -1,0 +1,2 @@
+STATUS: 200
+BODY: {"analysis_signal":"[감지: 무의미한 송신 - '테스트']","dissection_phrase":"흐릿한 거울이 텅 빈 화면을 반사합니다.","deep_question":"송신된 데이터의 목적은 무엇입니까?","action_prompt":"해상도를 높이십시오.","resolution_score":5}

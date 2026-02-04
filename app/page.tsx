@@ -9,6 +9,7 @@ import { GemBox } from '@/components/GemBox';
 import { ManifestoIntro } from '@/components/ManifestoIntro';
 import { GlitchText } from '@/components/GlitchText';
 import { checkInput, calculateNewResolution } from '@/lib/gameLogic';
+import { calculatePoDR, mintSBT, getRewardMessage } from '@/lib/podr';
 import { translations, Language } from '@/lib/translations';
 
 interface Message {
@@ -135,17 +136,34 @@ export default function Home() {
           }]);
         }, 300);
 
-        // Gem Logic
+        // Gem Logic / PoDR Protocol
         if (nextResolution >= 100) {
-          setTimeout(() => {
+          setTimeout(async () => {
             setGems(prev => [...prev, content]);
             setResolution(0);
+
+            // Trigger PoDR Minting Simulation
+            const podr = calculatePoDR(100);
+            const sbtData = await mintSBT(content);
+
+            // 1. System Nudge
             setMessages(prev => [...prev, {
               id: Date.now().toString() + '-gem',
               role: 'system',
-              content: translations[lang].gem_found,
+              content: translations[lang].gem_found + `\n\n[TX_HASH]: ${sbtData.txHash}\n[TOKEN_ID]: ${sbtData.tokenId}`,
               isGlitch: false
             }]);
+
+            // 2. Token Mining Feedback
+            setTimeout(() => {
+              setMessages(prev => [...prev, {
+                id: Date.now().toString() + '-mining',
+                role: 'system',
+                content: getRewardMessage(podr),
+                isGlitch: true
+              }]);
+            }, 1000);
+
           }, 1200);
         }
 

@@ -161,9 +161,7 @@ export default function Home() {
         // I will show the Interference Message, but then *also* provide a Local Logic response after a short delay,
         // creating a "Re-routing..." effect.
 
-        const interferenceMsg = lang === 'ko'
-          ? ":: 심해 신호가 약해 잠시 교신이 끊겼습니다. 보조 시스템으로 전환합니다."
-          : ":: Deep sea signal weak. Connection lost. Switching to auxiliary system.";
+        const interferenceMsg = translations[lang].signal_lost;
 
         setMessages(prev => [...prev, {
           id: Date.now().toString() + '-err',

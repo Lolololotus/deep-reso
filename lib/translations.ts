@@ -8,7 +8,7 @@ export interface DiggingCategory {
 export const translations = {
     ko: {
         title: "[ 사유의 해상전 : 금지된 단어들 ]",
-        system_init: ":: 시스템 가동. [사유의 해상전 : 금지된 단어들] 프로토콜에 접속합니다. 마지막으로 당신이 뱉은 말은 무엇입니까?",
+        system_init: "오늘 당신이 자신에게 건넨 가장 다정한 한마디는 무엇인가요?",
         input_placeholder: "당신의 사유를 송신하십시오...",
         res_metric: "해상도",
         status_online: "연결됨",
@@ -16,10 +16,11 @@ export const translations = {
         secure: "보안",
         scanning: "검역 중... 위장된 언어 감지 중...",
         res_increase: "해상도 상승. 덮여있던 의미가 +{val}% 선명해집니다.",
-        gem_found: "축하합니다. 순도 100%의 사유를 정제했습니다. 이 문장은 '보석함'에 영구 보존됩니다.",
+        gem_found: ":: 사유 해상도 100% 달성. [SBT: Soulbound Token]이 발행되었습니다. 당신의 진심은 위변조 불가능한 블록체인에 영구 기록됩니다.",
         last_breath: "함장님, 지금 막막한 것은 당신이 진실에 너무 가까워졌기 때문입니다. 잠시 숨을 고르고, 머리가 아닌 '심장'이 먼저 뱉는 단어를 써보십시오.",
         guide_nudge: "망설임은 사유의 밀도를 낮춥니다. 지금 느껴지는 '막막함'을 형용사 없이 묘사해보십시오.",
         system_busy: ":: 신호 불안정. 답변의 밀도가 낮아 사유 좌표를 잡을 수 없습니다.",
+        signal_lost: ":: 심해 신호가 약해 잠시 교신이 끊겼습니다. 주파수를 재조정하십시오.",
         enter_key: "ENTER",
         digging_prelude: ":: 심층 해부 프로토콜 가동. 키워드 감지: [{keyword}]",
         digging_categories: {
@@ -87,7 +88,7 @@ export const translations = {
     },
     en: {
         title: "[ Deep-Reso : The Forbidden Words ]",
-        system_init: ":: SYSTEM ONLINE. Connecting to [Deep-Reso : The Forbidden Words] protocol. What was the last thing you said?",
+        system_init: "What is the kindest thing you said to yourself today?",
         input_placeholder: "Transmit your thought...",
         res_metric: "RESOLUTION",
         status_online: "ONLINE",
@@ -95,10 +96,11 @@ export const translations = {
         secure: "SECURE",
         scanning: "SCANNING... DETECTING CAMOUFLAGE...",
         res_increase: "Resolution Increased. Meaning clarified by +{val}%.",
-        gem_found: "Congratulations. You have distilled a thought of 100% purity. It is now preserved in the Gem Box.",
+        gem_found: ":: Resolution 100% Reached. [SBT: Soulbound Token] Minted. Your truth is permanently recorded on the immutable blockchain.",
         last_breath: "Captain, if you feel lost, it is because you are close to the truth. Breathe. Let your heart speak first.",
         guide_nudge: "Hesitation lowers thought density. Describe your current 'block' without using adjectives.",
         system_busy: ":: SIGNAL UNSTABLE. Low density response. Cannot triangulate thought coordinates.",
+        signal_lost: ":: Deep sea signal weak. Connection lost. Adjust your frequency.",
         enter_key: "ENTER",
         digging_prelude: ":: DEEP DISSECTION PROTOCOL. KEYWORD: [{keyword}]",
         digging_categories: {

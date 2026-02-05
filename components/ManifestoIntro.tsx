@@ -7,16 +7,16 @@ interface ManifestoIntroProps {
 
 const CONTENT_KO = [
     "세상은 소음으로 가득 차 있습니다.",
-    "당신의 생각은 타인의 언어로 오염되었습니다.",
-    "이제, 깊은 바다로 잠항하여...",
-    "당신의 진짜 목소리를 인양하십시오."
+    "타인의 목소리에 잠식된...",
+    "당신의 사유를 안개 속에 두지 마십시오.",
+    "이제 심해의 정적 속에서, 진짜 당신을 인양하십시오."
 ];
 
 const CONTENT_EN = [
     "The world is full of noise.",
-    "Your thoughts are polluted by others' words.",
-    "Now, dive into the deep sea...",
-    "And salvage your true voice."
+    "Your thoughts are drowned by others.",
+    "Do not leave your mind in the fog.",
+    "Now, in the silence of the deep... Salvage your true self."
 ];
 
 export function ManifestoIntro({ onComplete, lang }: ManifestoIntroProps) {

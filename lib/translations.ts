@@ -16,13 +16,13 @@ export const translations = {
         secure: "보안",
         scanning: "검역 중... 위장된 언어 감지 중...",
         res_increase: "해상도 상승. 덮여있던 의미가 +{val}% 선명해집니다.",
-        gem_found: ":: 사유 해상도 100% 달성. [SBT: Soulbound Token]이 발행되었습니다. 당신의 진심은 위변조 불가능한 블록체인에 영구 기록됩니다.",
+        gem_found: "사유 해상도 100% 달성. [SBT: Soulbound Token]이 발행되었습니다. 당신의 진심은 위변조 불가능한 블록체인에 영구 기록됩니다.",
         last_breath: "함장님, 지금 막막한 것은 당신이 진실에 너무 가까워졌기 때문입니다. 잠시 숨을 고르고, 머리가 아닌 '심장'이 먼저 뱉는 단어를 써보십시오.",
         guide_nudge: "망설임은 사유의 밀도를 낮춥니다. 지금 느껴지는 '막막함'을 형용사 없이 묘사해보십시오.",
-        system_busy: ":: 신호 불안정. 답변의 밀도가 낮아 사유 좌표를 잡을 수 없습니다.",
-        signal_lost: ":: 심해 신호가 약해 잠시 교신이 끊겼습니다. 주파수를 재조정하십시오.",
+        system_busy: "신호 불안정. 답변의 밀도가 낮아 사유 좌표를 잡을 수 없습니다.",
+        signal_lost: "심해 신호가 약해 잠시 교신이 끊겼습니다. 주파수를 재조정하십시오.",
         enter_key: "ENTER",
-        digging_prelude: ":: 심층 해부 프로토콜 가동. 키워드 감지: [{keyword}]",
+        digging_prelude: "심층 해부 프로토콜 가동. 키워드 감지: [{keyword}]",
         digging_categories: {
             fatigue: [
                 "그 피로의 무게가 어깨를 누르는 납덩이입니까, 아니면 머릿속을 맴도는 공허한 소음입니까?",

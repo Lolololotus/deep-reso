@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ResolutionGauge } from '@/components/ResolutionGauge';
 import { ChatWindow } from '@/components/ChatWindow';
 import { InputConsole } from '@/components/InputConsole';
@@ -30,6 +30,7 @@ export default function Home() {
 
   // Anti-Repetition Queue (v3.1)
   const [recentTemplates, setRecentTemplates] = useState<string[]>([]);
+  const [globalGlitch, setGlobalGlitch] = useState(false);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -38,6 +39,52 @@ export default function Home() {
       content: translations['ko'].system_init
     }
   ]);
+
+  // Audio Refs
+  const ambientRef = useRef<HTMLAudioElement | null>(null);
+  const glitchRef = useRef<HTMLAudioElement | null>(null);
+
+  // Keyword Triggers (Phase 3)
+  const TRIGGER_KEYWORDS = ['거짓', '가짜', '몰라', '숨기다', '두려움', 'fake', 'lie', 'fear', 'hide'];
+
+  useEffect(() => {
+    // Initialize Audio
+    ambientRef.current = new Audio('/sounds/underwater_ambience.mp3');
+    ambientRef.current.loop = true;
+    ambientRef.current.volume = 0.3;
+
+    glitchRef.current = new Audio('/sounds/glitch_stutter.mp3');
+    glitchRef.current.volume = 0.5;
+
+    // Try play ambient (browsers might block autoplay)
+    const playAmbient = async () => {
+      try {
+        await ambientRef.current?.play();
+      } catch (e) {
+        console.log("Audio autoplay blocked, waiting for interaction");
+      }
+    };
+    playAmbient();
+
+    return () => {
+      ambientRef.current?.pause();
+      ambientRef.current = null;
+      glitchRef.current = null;
+    };
+  }, []);
+
+  const triggerGlitchEffect = () => {
+    setGlobalGlitch(true);
+    glitchRef.current?.play().catch(() => { });
+    setTimeout(() => setGlobalGlitch(false), 300); // 300ms glitch duration
+  };
+
+  const checkKeywords = (text: string) => {
+    const found = TRIGGER_KEYWORDS.some(k => text.includes(k));
+    if (found) {
+      triggerGlitchEffect();
+    }
+  };
 
   useEffect(() => {
     if (messages.length === 1 && messages[0].id === 'init-1') {
@@ -82,10 +129,19 @@ export default function Home() {
     setMessages(prev => [...prev, newMessage]);
     setIsScanning(true);
 
+    // Keyword Trigger
+    checkKeywords(content);
+
     // AI / Local Logic
     try {
       // Minimum visual delay for "Thinking" effect
       const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1500));
+
+      // ... (Rest of existing logic remains via ... context, but we are inside handleSendMessage)
+      // Since replace_file_content replaces a chunk, I need to be careful not to break the function.
+      // I will only target the start of handleSendMessage.
+
+
 
       // API Call Promise - We catch errors HERE to prevent Unhandled Rejection
       const apiPromise = fetch('/api/analyze', {
@@ -302,6 +358,14 @@ export default function Home() {
           </div>
 
           <GemBox gems={gems} />
+
+          {/* Global Glitch Overlay */}
+          {globalGlitch && (
+            <div className="fixed inset-0 z-[100] pointer-events-none mix-blend-difference bg-alert-red/10 animate-pulse">
+              <div className="absolute inset-0 bg-transparent animate-glitch-1 opacity-50"></div>
+              <div className="absolute inset-0 bg-transparent animate-glitch-2 opacity-50" style={{ animationDirection: 'reverse' }}></div>
+            </div>
+          )}
         </>
       )}
     </main>

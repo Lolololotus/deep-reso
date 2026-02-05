@@ -9,7 +9,7 @@ import { GemBox } from '@/components/GemBox';
 import { ManifestoIntro } from '@/components/ManifestoIntro';
 import { GlitchText } from '@/components/GlitchText';
 import { checkInput, calculateNewResolution } from '@/lib/gameLogic';
-import { calculatePoDR, mintSBT, getRewardMessage } from '@/lib/podr';
+import { calculatePoDR, mintSBT, getRewardMessage, createAnswerAsset, Answer_Asset } from '@/lib/podr';
 import { translations, Language } from '@/lib/translations';
 
 interface Message {
@@ -22,7 +22,8 @@ interface Message {
 export default function Home() {
   const [lang, setLang] = useState<Language>('ko');
   const [resolution, setResolution] = useState(0);
-  const [gems, setGems] = useState<string[]>([]);
+  // Updated to Answer_Asset[]
+  const [gems, setGems] = useState<Answer_Asset[]>([]);
   const [showIntro, setShowIntro] = useState(true);
   const [consecutiveFailures, setConsecutiveFailures] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
@@ -139,12 +140,19 @@ export default function Home() {
         // Gem Logic / PoDR Protocol
         if (nextResolution >= 100) {
           setTimeout(async () => {
-            setGems(prev => [...prev, content]);
-            setResolution(0);
+            // Create Asset Object
+            const newAsset = createAnswerAsset(content, 100);
 
             // Trigger PoDR Minting Simulation
             const podr = calculatePoDR(100);
             const sbtData = await mintSBT(content);
+
+            // Update Asset with Blockchain Data
+            newAsset.mintStatus = true;
+            newAsset.txHash = sbtData.txHash;
+
+            setGems(prev => [...prev, newAsset]);
+            setResolution(0);
 
             // 1. System Nudge
             setMessages(prev => [...prev, {
@@ -171,14 +179,6 @@ export default function Home() {
         // === FAILURE / FALLBACK PATH ===
         console.warn("AI Failed, triggering fallback/interference.", aiResult?.details);
 
-        // User requested: ":: 통신 주파수 간섭 발생. 잠항을 일시 중단합니다."
-        // AND we also have the v3.1 Local Engine.
-        // Strategy: Show the Interference message, then run Local Logic to keep the game alive?
-        // Or just show interference and stop?
-        // "잠항을 일시 중단합니다" implies stop. But that's bad UX if it happens often (e.g. no key).
-        // I will show the Interference Message, but then *also* provide a Local Logic response after a short delay,
-        // creating a "Re-routing..." effect.
-
         const interferenceMsg = translations[lang].signal_lost;
 
         setMessages(prev => [...prev, {
@@ -191,12 +191,6 @@ export default function Home() {
         // Trigger Local Logic after 1s
         setTimeout(() => {
           const checkResult = checkInput(content, lang, resolution, recentTemplates);
-
-          // ... (Local Logic Code) ...
-          // Reusing the local logic block structure logic essentially
-
-          // Just calling the logic handler directly or replicating here?
-          // Replicating for clarity in this snippet.
 
           let localResponse = "";
           let isGlitch = checkResult.isGlitch;
@@ -232,7 +226,11 @@ export default function Home() {
             setResolution(newResolution);
 
             if (newResolution >= 100) {
-              setGems(prev => [...prev, content]);
+              // Local PoDR Logic (Simplified)
+              const newAsset = createAnswerAsset(content, 100);
+              newAsset.mintStatus = true;
+
+              setGems(prev => [...prev, newAsset]);
               setResolution(0); // Reset resolution after gem
               localResponse = translations[lang].gem_found;
             } else if (newResolution === 98) {

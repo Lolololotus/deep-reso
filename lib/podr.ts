@@ -12,6 +12,26 @@ interface PoDRScore {
  * Calculates the PoDR Score and Token Weight based on the raw resolution score.
  * @param resolutionScore 0-100 score from AI or Local Logic
  */
+
+export interface Answer_Asset {
+    id: string;
+    content: string; // The user's final sentence
+    resolutionScore: number;
+    timestamp: number;
+    mintStatus: boolean; // True if score >= 100
+    txHash?: string;
+}
+
+export function createAnswerAsset(content: string, score: number): Answer_Asset {
+    return {
+        id: `asset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        content,
+        resolutionScore: score,
+        timestamp: Date.now(),
+        mintStatus: score >= 100
+    };
+}
+
 export function calculatePoDR(resolutionScore: number): PoDRScore {
     // Logic: Higher resolution = Exponentially higher token weight
     // 100% = 10x weight

@@ -163,7 +163,10 @@ export default function Home() {
       if (aiResult && !aiResult.error && aiResult.resolution_score !== undefined) {
         // === AI SUCCESS PATH ===
         const aiData = aiResult;
-        const newRes = aiData.resolution_score;
+        // Prioritize truth_density, fallback to resolution_score
+        const newRes = aiData.truth_density ?? aiData.resolution_score;
+
+        console.log(`[Deep-Reso] Truth Density: ${newRes}% | Analysis:`, aiData.analysis_signal);
 
         // Resolution Logic based on AI Score
         // If AI score is high, boost resolution. If low, drop it.

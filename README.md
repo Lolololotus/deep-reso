@@ -52,3 +52,45 @@
 - **$PoDR (Proof of Deep-Resolution)**: 유저가 자신의 취약함을 인정하고 본질에 직면하는 정도를 알고리즘으로 분석하여 점수화합니다.
 - **보석 토큰 (SBT)**: 해상도 100% 도달 시 유저의 고유한 사유를 영구히 기록하는 양도 불가능한 **Soulbound Token**을 발행합니다.
 - **경제적 가치**: 사유의 밀도에 따라 **$RESO 토큰 가중치**를 부여하여, 인류의 고뇌가 실질적인 자산 가치로 환산되는 구조를 구축합니다.
+
+---
+
+## 🛠 기술 스택 (Tech Stack)
+
+- **Framework**: Next.js 16.1.6 (App Router)
+- **Styling**: Tailwind CSS 4 (Deep Sea & Glitch Aesthetic)
+- **AI Engine**: Google Gemini API (gemini-flash-latest) - PoDR Logic Enforced
+- **Logic**: TypeScript, PoDR Algorithm (Truth Density)
+- **Deployment**: Vercel
+
+---
+
+## 🚀 시작하기 (Getting Started)
+
+1. **환경 변수 설정**: root 디렉토리에 `.env` 파일을 생성하고 Gemini API 키를 입력하세요.
+   ```bash
+   GEMINI_API_KEY=your_api_key_here
+   ```
+
+2. **의존성 설치**:
+   ```bash
+   npm install
+   ```
+
+3. **개발 서버 실행**:
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 🗺 로드맵 (Roadmap)
+
+- [x] 프로젝트 비전 및 PoDR 프로토콜 기획
+- [x] AI '지미니' 페르소나 및 3줄 답변 로직 연동 (`app/api/analyze`)
+- [x] 실시간 해상도 게이지 UI 구현
+- [x] 심해 테마 (Glitch/Dark Mode) 적용
+- [x] PoDR 점수 산정 및 채굴 가중치 로직 구현 (`lib/podr.ts`)
+- [x] Vercel 호스팅 이전 및 배포
+- [ ] Answer_Asset 및 SBT 발행 시뮬레이션 고도화
+- [ ] 블록체인 메인넷 연동 (Ethereum/Polygon)

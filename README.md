@@ -8,6 +8,19 @@
 
 **Deep-Resolution(사유의 해상전)**은 기술이 인간을 소외시키는 시대에 역설적으로 기술을 도구 삼아 인간 고유의 사유 과정을 보호하고, 그 내면의 가치를 증명하는 **SnF(Safety and Freedom) 생태계**의 핵심 프로토콜입니다.
 
+---
+
+## 🍃 Our Soil: The SnF Ecosystem
+
+Taste Tree는 인간 사유의 밀도를 보호하는 **SnF(Soft & Firm)** 생태계의 두 번째 여정입니다. 우리는 기술이 차가운 도구가 아닌, 인간의 영혼을 비추는 다정한 거울이 되길 바랍니다.
+
+* **☁️ Sense Your Day**: 당신의 오늘을 예술적 처방으로 수용하는 관문.
+* **💎Prism-Arcana**: 사유를 빛의 예술(스테인드글라스)로 형상화하는 실물 자산화 엔진.
+* **🌳 Taste Tree**: 파편화된 기억을 연결하여 다정한 숲을 이루는 연결의 여정.
+* **🏰 Deep-Reso**: 보호받아야 할 사유의 밀도를 증명하는 **최후의 요새**.
+
+---
+
 ## 🌊 거시적 비전 (Macro Vision)
 
 ### 1. 디지털 인류학의 초석 (Cornerstone of Digital Anthropology)

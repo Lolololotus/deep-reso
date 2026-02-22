@@ -67,36 +67,35 @@
 
 ---
 
-## 🚀 시작하기 (Getting Started)
+## 👥 Contributors
+### 이 요새는 기술과 철학, 그리고 인공지능의 협업으로 구축되었습니다.
 
-1. **환경 변수 설정**: root 디렉토리에 `.env` 파일을 생성하고 Gemini API 키를 입력하세요.
-   ```bash
-   GEMINI_API_KEY=your_api_key_here
-   ```
-
-2. **의존성 설치**:
-   ```bash
-   npm install
-   ```
-
-3. **개발 서버 실행**:
-   ```bash
-   npm run dev
-   ```
+* Lotus Team Leader: Service Planning & Technical Direction
+* Anti-Gravity Team Leader: Core Development & UI Deployment
+* Gemini 2.0 Flash: AI Logic Coordination & Code Integrity Check
 
 ---
 
-## 🗺 로드맵 (Roadmap)
 
-- [x] 프로젝트 비전 및 PoDR 프로토콜 기획
-- [x] AI '지미니' 페르소나 및 3줄 답변 로직 연동 (`app/api/analyze`)
-- [x] 실시간 해상도 게이지 UI 구현
-- [x] 심해 테마 (Glitch/Dark Mode) 적용
-- [x] PoDR 점수 산정 및 채굴 가중치 로직 구현 (`lib/podr.ts`)
-- [x] Vercel 호스팅 이전 및 배포
-- [ ] Answer_Asset 및 SBT 발행 시뮬레이션 고도화
-- [ ] 블록체인 메인넷 연동 (Ethereum/Polygon)
+## 🕒 The Deep-Sea Fortress Construction Roadmap
 
+###이 프로젝트는 완성이라는 목적지보다, 더 깊은 심해로 나아가는 과정 그 자체에 본질이 있습니다.
+
+* **Phase 1: 정적의 설계 (Founding Philosophy) | 2026-02-04**
+* SnF 생태계의 거시 비전 수립 및 '지미니의 맹세' 초안 작성. 
+* 인간 존엄성 보호를 위한 3행 제한 응답 로직 및 격식 있는 페르소나 확립. 
+
+* **Phase 2: 심해의 엔진 ($PoDR$ Protocol) | 2026-02-05**
+* 고통의 깊이와 환희의 선명도를 측정하는 Truth Density 알고리즘 구현. 
+* [안개, 낡은 옷, 젖은 솜] 비유를 통한 AI '영혼의 세공사' 페르소나 정밀 튜닝.
+
+* **Phase 3: 요새의 완공 (Deployment & Migration) | 2026-02-11**
+* Vercel 호스팅 이전 및 심해의 압력을 시각화하는 Glitch UI 통합. 
+* 정서적 사운드 로직(underwater_ambience.mp3) 탑재를 통한 몰입형 UX 완성.
+
+* **Phase 4: 인양의 계속 (Ongoing Deep-Dive) | 2026-02-17 ~ Present**
+* 기록의 정직함: 2월 17일의 1차 마침표를 지났으나, 타협할 수 없는 사유의 해상도를 위해 고도화 작업을 지속함. 
+* 현재 진행형: 유저의 방어 기제를 더 다정하게 어루만지는 '단계적 잠항(Scaffolding)' 로직 및 전환점 메시지 고도화 중.
 
 ---
 
